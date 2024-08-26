@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background-color: #00798a;
+        font-family: sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        min-height: 100vh;
+        justify-content: center;
+      }
+
+      .game-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 20px;
+        padding: 20px;
+        width: 100%;
+        max-width: 600px;
+      }
+
+      .memory-game {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 20px;
+        width: 100%;
+      }
+
+      .memory-card {
+        width: 100%;
+        aspect-ratio: 1;
+        position: relative;
+        transform: scale(1);
+        transform-style: preserve-3d;
+        transition: transform 0.5s;
+        cursor: pointer;
+      }
+
+      .memory-card:active {
+        transform: scale(0.97);
+        transition: transform 0.2s;
+      }
+
+      .memory-card.flip {
+        transform: rotateY(180deg);
+      }
+
+      .front-face,
+      .back-face {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        border-radius: 5px;
+        background-color: #0d2e41;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 2em;
+        color: white;
+        backface-visibility: hidden;
+      }
+
+      .front-face {
+        transform: rotateY(180deg);
+      }
+
+      /* White stroke for all icons */
+        .memory-card .fa-bomb,
+        .memory-card .fa-spider,
+        .memory-card .fa-mountain,
+        .memory-card .fa-truck,
+        .memory-card .fa-coffee {
+        -webkit-text-stroke: 1px white; /* Add white stroke to icons */
+        }
+
+        /* Unique color for each pair of icons */
+        .fa-anchor { color: #ff6347; } /* Tomato */
+        .fa-bicycle { color: #ffa07a; } /* Light Salmon */
+        .fa-bolt { color: #ffd700; } /* Gold */
+        .fa-bomb { color: #4b0082; } /* Indigo */
+        .fa-car { color: #dc143c; } /* Crimson */
+        .fa-cat { color: #00ced1; } /* Dark Turquoise */
+        .fa-coffee { color: #8b4513; } /* Saddle Brown */
+        .fa-crow { color: #2e8b57; } /* Sea Green */
+        .fa-dog { color: #ff4500; } /* Orange Red */
+        .fa-dove { color: #4682b4; } /* Steel Blue */
+        .fa-dragon { color: #7b68ee; } /* Medium Slate Blue */
+        .fa-feather { color: #8a2be2; } /* Blue Violet */
+        .fa-fish { color: #5f9ea0; } /* Cadet Blue */
+        .fa-frog { color: #7fff00; } /* Chartreuse */
+        .fa-ghost { color: #ff69b4; } /* Hot Pink */
+        .fa-horse { color: #a52a2a; } /* Brown */
+        .fa-kiwi-bird { color: #6b8e23; } /* Olive Drab */
+        .fa-lemon { color: #ffd700; } /* Gold */
+        .fa-pepper-hot { color: #ff6347; } /* Tomato */
+        .fa-plane { color: #ff8c00; } /* Dark Orange */
+        .fa-spider { color: #8b0000; } /* Dark Red */
+        .fa-star { color: #daa520; } /* Golden Rod */
+        .fa-truck { color: #b22222; } /* Fire Brick */
+        .fa-umbrella { color: #db7093; } /* Pale Violet Red */
+        .fa-tree { color: #228b22; } /* Forest Green */
+        .fa-heart { color: #ff1493; } /* Deep Pink */
+        .fa-moon { color: #8a2be2; } /* Blue Violet */
+        .fa-sun { color: #ffdf00; } /* Yellow */
+        .fa-leaf { color: #32cd32; } /* Lime Green */
+        .fa-cloud { color: #87ceeb; } /* Sky Blue */
+        .fa-snowflake { color: #00bfff; } /* Deep Sky Blue */
+        .fa-mountain { color: #2f4f4f; } /* Dark Slate Gray */
+
+
+      .size-select {
+        margin-bottom: 10px;
+      }
+
+      .victory-message {
+        display: none;
+        font-size: 2em;
+        color: #ffdf00;
+        margin-top: 20px;
+        text-align: center;
+        animation: victoryAnimation 1s infinite;
+      }
+
+      @keyframes victoryAnimation {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+      }
+
+      /* Fireworks */
+      .firework-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1000;
+      }
+
+      .firework {
+        position: absolute;
+        border-radius: 50%;
+        transform: scale(0);
+        opacity: 0;
+        pointer-events: none;
+        animation: fireworkAnimation 1s ease-out infinite;
+      }
+
+      @keyframes fireworkAnimation {
+        0% {
+          transform: scale(0);
+          opacity: 1;
+        }
+        50% {
+          transform: scale(1.5);
+          opacity: 0.6;
+        }
+        100% {
+          transform: scale(2);
+          opacity: 0;
+        }
+      }
+    </style>
+</head>
+<body>
+  <div class="game-container">
+    <h1>Memory Game</h1>
+    <div class="size-select">
+      <label for="grid-size">Select Grid Size:</label>
+      <select id="grid-size">
+        <option value="4">4x4</option>
+        <option value="6">6x6</option>
+        <option value="8">8x8</option>
+      </select>
+    </div>
+    <section class="memory-game"></section>
+    <div class="victory-message">Congratulations! You solved the puzzle!</div>
+    <div class="firework-container"></div>
+  </div>
+
+  <script>
+    const memoryGame = document.querySelector(".memory-game");
+    const gridSizeSelect = document.getElementById('grid-size');
+    const victoryMessage = document.querySelector('.victory-message');
+    const fireworkContainer = document.querySelector('.firework-container');
+
+    let icons = [
+        'fa-anchor', 'fa-bicycle', 'fa-bolt', 'fa-bomb',
+        'fa-car', 'fa-cat', 'fa-coffee', 'fa-crow',
+        'fa-dog', 'fa-dove', 'fa-dragon', 'fa-feather',
+        'fa-fish', 'fa-frog', 'fa-ghost', 'fa-horse',
+        'fa-kiwi-bird', 'fa-lemon', 'fa-pepper-hot', 'fa-plane',
+        'fa-spider', 'fa-star', 'fa-truck', 'fa-umbrella',
+        'fa-tree', 'fa-heart', 'fa-moon', 'fa-sun',
+        'fa-leaf', 'fa-cloud', 'fa-snowflake', 'fa-mountain'
+    ];
+
+
+    let hasFlippedCard = false;
+    let lockBoard = false;
+    let firstCard, secondCard;
+    let gridSize = 4; // Default grid size
+    let matchedPairs = 0; // Track matched pairs
+
+    // Function to generate the game board
+    function generateGameBoard() {
+      memoryGame.innerHTML = ''; // Clear existing cards
+      victoryMessage.style.display = 'none'; // Hide victory message
+      fireworkContainer.innerHTML = ''; // Clear fireworks
+
+      const totalCards = gridSize * gridSize;
+      matchedPairs = 0; // Reset matched pairs counter
+
+      let selectedIcons = icons.slice(0, totalCards / 2);
+      selectedIcons = [...selectedIcons, ...selectedIcons]; // Duplicate for pairs
+      shuffle(selectedIcons); // Shuffle the icons
+
+      memoryGame.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+      
+      for (let i = 0; i < totalCards; i++) {
+        const card = document.createElement("div");
+        card.classList.add("memory-card");
+        card.setAttribute('data-icon', selectedIcons[i]);
+        card.innerHTML = `
+          <i class="fas ${selectedIcons[i]} front-face"></i>
+          <i class="fas fa-question-circle back-face"></i>
+        `;
+        card.addEventListener("click", flipCard);
+        memoryGame.appendChild(card);
+      }
+    }
+
+    // Function to handle card flip
+    function flipCard() {
+      if (lockBoard) return;
+      if (this === firstCard) return;
+
+      this.classList.add("flip");
+
+      if (!hasFlippedCard) {
+        hasFlippedCard = true;
+        firstCard = this;
+        return;
+      }
+
+      secondCard = this;
+      checkForMatch();
+    }
+
+    // Function to check if flipped cards match
+    function checkForMatch() {
+      let isMatch = firstCard.dataset.icon === secondCard.dataset.icon;
+
+      if (isMatch) {
+        disableCards();
+        matchedPairs++;
+
+        if (matchedPairs === gridSize * gridSize / 2) {
+          setTimeout(() => {
+            showVictoryMessage();
+            triggerFireworks();
+          }, 1000);
+        }
+      } else {
+        unflipCards();
+      }
+    }
+
+    // Function to disable matched cards
+    function disableCards() {
+      firstCard.removeEventListener("click", flipCard);
+      secondCard.removeEventListener("click", flipCard);
+      resetBoard();
+    }
+
+    // Function to unflip unmatched cards
+    function unflipCards() {
+      lockBoard = true;
+
+      setTimeout(() => {
+        firstCard.classList.remove("flip");
+        secondCard.classList.remove("flip");
+        resetBoard();
+      }, 1500);
+    }
+
+    // Function to reset board state
+    function resetBoard() {
+      [hasFlippedCard, lockBoard] = [false, false];
+      [firstCard, secondCard] = [null, null];
+    }
+
+    // Function to shuffle array
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    // Function to show victory message
+    function showVictoryMessage() {
+      victoryMessage.style.display = 'block';
+    }
+
+    // Function to trigger fireworks
+    function triggerFireworks() {
+      for (let i = 0; i < 15; i++) {
+        const firework = document.createElement('div');
+        firework.classList.add('firework');
+        firework.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        firework.style.width = `${Math.random() * 10 + 5}px`;
+        firework.style.height = firework.style.width;
+        firework.style.top = `${Math.random() * 100}%`;
+        firework.style.left = `${Math.random() * 100}%`;
+        firework.style.animationDelay = `${Math.random() * 1.5}s`;
+        fireworkContainer.appendChild(firework);
+      }
+      setTimeout(() => fireworkContainer.innerHTML = '', 3000); // Clear fireworks after 3 seconds
+    }
+
+    // Event listener for grid size selection
+    gridSizeSelect.addEventListener('change', () => {
+      gridSize = parseInt(gridSizeSelect.value, 10);
+      generateGameBoard(); 
+    });
+
+    // Generate the initial game board
+    generateGameBoard(); 
+  </script>
+</body>
+</html>
