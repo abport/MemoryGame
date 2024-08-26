@@ -7,6 +7,9 @@ Here’s a README template for your memory game project:
 Welcome to the **Memory Game**! This is a fun and interactive memory puzzle where you flip cards to match pairs. The game is responsive, customizable with different grid sizes, and features animated victory messages along with celebratory fireworks upon completing the puzzle.
 
 ![Memory Game](https://github.com/abport/MemoryGame/blob/main/memory_game.png)
+<p align="center">
+  <img src="[link_to_your_screenshot.png](https://github.com/abport/MemoryGame/blob/main/memory_game.png)" alt="Memory Game Screenshot" width="600">
+</p>
 
 ## 🚀 Features
 
