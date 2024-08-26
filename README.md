@@ -51,8 +51,4 @@ You can also play the game directly [here](https://abport.github.io/MemoryGame/)
 
 Contributions are welcome! If you have any suggestions, feel free to create an issue or submit a pull request.
 
-## 👤 Author
-
-**abport**  
-- GitHub: [abport](https://github.com/abport)
 
