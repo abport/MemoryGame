@@ -37,7 +37,7 @@ Welcome to the **Memory Game**! This is a fun and interactive memory puzzle wher
 
 ## 🌐 Live Demo
 
-You can also play the game directly [here](link_to_live_demo). (Add the link to your deployed GitHub Pages site)
+You can also play the game directly [here](https://abport.github.io/MemoryGame/). (Add the link to your deployed GitHub Pages site)
 
 ## 📚 How to Play
 
